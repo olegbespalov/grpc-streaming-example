@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package chat;
+
+service ChatService {
+   rpc chat(stream Message) returns (stream Message) {}
+}
+
+message Message {
+   string from = 1;
+   string message = 2;
+}
