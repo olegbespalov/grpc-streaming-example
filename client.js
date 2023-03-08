@@ -28,47 +28,40 @@ if (username) {
    metadata.add('username', username);
 }
 
-try {
-   Info(`connecting to ${CHAT_ADDR} with "${username}" username`);
-   const stream = client.chat(metadata);
+Info(`connecting to ${CHAT_ADDR} with "${username}" username`);
+const stream = client.chat(metadata);
 
-   Info('connected..')
+stream.on('data', (m) => {
+   Info(`${m.from}: ${m.message}`);
+});
 
-   stream.on('data', (m) => {
-      Info(`${m.from}: ${m.message}`);
-   });
+stream.on('error', (error) => {
+   Info(`${error}`);
 
-   stream.on('error', (error) => {
-      Info(`${error}`);
+   stream.end();
+   rl.close();
+});
 
+stream.on('end', () => {
+   Info('end happened');
+
+   stream.end();
+   rl.close();
+});
+
+const rl = readline.createInterface({
+   input: process.stdin,
+   output: process.stdout
+});
+
+rl.on('line', (line) => {
+   if (line === 'exit') {
       stream.end();
       rl.close();
+      return;
+   }
+
+   stream.write({
+      message: line
    });
-
-   stream.on('end', () => {
-      Info('end happened');
-
-      stream.end();
-      rl.close();
-   });
-
-   const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-   });
-
-   rl.on('line', (line) => {
-      if (line === 'exit') {
-         stream.end();
-         rl.close();
-         return;
-      }
-
-      stream.write({
-         message: line
-      });
-   });
-} catch (error) {
-   Info(`can't connect to the chat server`);
-}
-
+});
